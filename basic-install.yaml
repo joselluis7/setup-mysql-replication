@@ -1,0 +1,17 @@
+---
+   - name: Setup basics and utils packages
+     hosts: all
+
+     tasks:
+     - name: Install epel-release repository for RedHat
+       package: 
+        name: epel-release
+        state: latest
+       when: ansible_os_family == "RedHat"
+
+     - name: Install usefull for setup a server
+       package: 
+        name: [ vim, rsync, byobu, yum-utils, traceroute, bind-utils, mtr, htop, bzip2, telnet, nmap, wget, mlocate ] 
+        state: present
+
+       
