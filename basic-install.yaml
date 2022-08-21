@@ -1,6 +1,8 @@
 ---
    - name: Setup basics and utils packages
      hosts: all
+     vars_files:
+      - default-vars.yaml
 
      tasks:
      - name: Install epel-release repository for RedHat
@@ -11,7 +13,8 @@
 
      - name: Install usefull for setup a server
        package: 
-        name: [ vim, rsync, byobu, yum-utils, traceroute, bind-utils, mtr, htop, bzip2, telnet, nmap, wget, mlocate ] 
+        name: "{{ item}}"
         state: present
+       with_items: "{{ server_packages}}"
 
        
