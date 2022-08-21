@@ -1,3 +1,3 @@
-#
-#
-server_packages: { vim, rsync, byobu, yum-utils, traceroute, bind-utils, mtr, htop, bzip2, telnet, nmap, wget, mlocate }
+# The main varibles are here
+# The variables for general purpose
+server_packages: {vim, rsync, byobu, yum-utils, traceroute, bind-utils, mtr, htop, bzip2, telnet, nmap, wget, mlocate}
