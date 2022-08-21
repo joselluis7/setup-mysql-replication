@@ -1,19 +1,20 @@
 ---
    - name: Setup basics and utils packages
      hosts: all
+     
      vars_files:
       - default-vars.yaml
 
      tasks:
      - name: Install epel-release repository for RedHat
-       package: 
+       yum: 
         name: epel-release
         state: latest
        when: ansible_os_family == "RedHat"
 
      - name: Install usefull for setup a server
        package: 
-        name: "{{ item}}"
+        name: "{{ item }}"
         state: present
        with_items: "{{ server_packages}}"
 
