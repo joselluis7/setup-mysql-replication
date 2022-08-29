@@ -1,6 +1,7 @@
 mysql_config_file: /etc/percona-server.conf.d/mysqld.cnf
 
 source:
+  name: source
   server_id: 1
   binlog: mysql-bin-log
   datadir: /var/lib/mysql/source-db/
@@ -10,6 +11,7 @@ source:
   log_file: /var/log/mysqld-source-error.log
 
 replica:
+  name: replica
   server_id: 2
   datadir: /var/lib/mysql/replica-db/
   socket: /var/lib/mysql/mysql-replica.sock
