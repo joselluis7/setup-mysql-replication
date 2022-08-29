@@ -19,4 +19,24 @@
         state: present
        when: ansible_os_family == "RedHat"
 
+     - name: Backup configuration files
+       shell: "cp {{ mysql_config_file }} {{ mysql_config_file }}.bck " 
+    
+     - name: Create datadir for instance {{ item.name }}
+       file:
+        path: {{ item.datadir }}
+        state: directory
+        mode: 0751
+        owner: mysql
+        group: mysql
+        recurse: yes
+       with_items:
+        - {{ source }}
+        - {{ replica }}
        
+     - name: Initialize datadir for instance {{ item.name }}
+       shell: "mysqld --initialize-insecure --basedir=/usr --datadir={{ item.datadir }} --console"
+       #ignore_errors: yes
+       with_items:
+        - {{ source }}
+        - {{ replica }}
