@@ -1,10 +1,26 @@
 mysql_config_file: /etc/percona-server.conf.d/mysqld.cnf
+mysql_user: root
+mysql_pass: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          37646130383836663037383965383832343165373231393939313531623836323735633364323762
+          3234383430323361633135313835306333306231653533350a323166626438633337306239313664
+          62306663616232636431393266333663306465343338623031393861356134353962633933663937
+          6539613963376432660a616238363239623134393331323638636565356431396135303432636533
+          3037
+mysql_rpl_user: replica
+mysql_rpl_pass: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          37646130383836663037383965383832343165373231393939313531623836323735633364323762
+          3234383430323361633135313835306333306231653533350a323166626438633337306239313664
+          62306663616232636431393266333663306465343338623031393861356134353962633933663937
+          6539613963376432660a616238363239623134393331323638636565356431396135303432636533
+          3037
 
 source:
   name: source
   server_id: 1
   binlog: mysql-bin-log
-  datadir: /var/lib/mysql/source-db/
+  datadir: /var/lib/mysql/source-db
   socket: /var/lib/mysql/mysql-source.sock
   pid_file: /var/run/mysqld/mysqld-source.pid
   port: 3306
@@ -13,7 +29,7 @@ source:
 replica:
   name: replica
   server_id: 2
-  datadir: /var/lib/mysql/replica-db/
+  datadir: /var/lib/mysql/replica-db
   socket: /var/lib/mysql/mysql-replica.sock
   pid_file: /var/run/mysqld/mysqld-replica.pid
   port: 3307
