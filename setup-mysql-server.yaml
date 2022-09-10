@@ -40,3 +40,41 @@
        with_items:
         - {{ source }}
         - {{ replica }}
+
+     - name: start service for instance {{ item }}
+       service:
+        name: mysqld@{{ item }}
+        state: started
+       with_items:
+        - {{ source.name }}
+        - {{ replica.name }}
+
+     - name: Create replica user in source instance and grant replication privillege
+       mysql_user:
+        login_user: {{ mysql_user }}
+        login_password: "{{ mysql_password }}"
+        login_port: {{ source.port }}
+        login_host: 127.0.0.1
+        priv: "*.*:REPLICATION SLAVE"
+        name: {{  mysql_rpl_user }}
+        password: {{ mysql_rpl_pass }}
+        state: present
+
+     - name: Get sources binary log file name and current position
+       mysql_replication:
+        mode: getprimary
+       register: coordinates
+
+     - name: "change master: point replica to master"
+       mysql_replication:
+        mode: changeprimary
+        login_user: root
+        login_password: "{{ mysql_password }}"
+        primary_host: 127.0.0.1
+        primary_port: 3306
+        primary_password: "{{ mysql_rpl_pass }}"
+        primary_log_file: "{{ register.log_file }}"
+        primary_log_pos: "{{ register.log_pos }}"
+
+      
+       
