@@ -71,10 +71,39 @@
         login_user: root
         login_password: "{{ mysql_password }}"
         primary_host: 127.0.0.1
-        primary_port: 3306
+        primary_port: {{ source.port  }}
         primary_password: "{{ mysql_rpl_pass }}"
         primary_log_file: "{{ register.log_file }}"
         primary_log_pos: "{{ register.log_pos }}"
 
+     # Check Before 
+     - name: Check replica replication status.
+       mysql_replication:
+        mode: getreplica
+        login_user: "{{ mysql_root_username }}"
+        login_password: "{{ mysql_root_password }}"
+        login_port: {{ replica.port  }}
+       ignore_errors: true
+       register: replica_before
+
+     - name: Start replication 
+       mysql_replication:
+        mode: startreplica
+        login_user: "{{ mysql_root_username }}"
+        login_password: "{{ mysql_root_password }}"
+        login_port: {{ replica.port  }}
+       ignore_errors: true
       
-       
+     # Check After 
+     - name: Check replica replication status.
+       mysql_replication:
+        mode: getreplica
+        login_user: "{{ mysql_root_username }}"
+        login_password: "{{ mysql_root_password }}"
+        login_port: {{ replica.port  }}
+       ignore_errors: true
+       register: replica_after
+
+# FALTA ADICIONAR AS CONDIÇÕES
+# TALVEZ INTERPOLAR MAIS VARIÁVEIS
+#
