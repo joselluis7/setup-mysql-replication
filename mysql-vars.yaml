@@ -1,6 +1,6 @@
 
-mysql_config_dir: /etc/percona-server.conf.d/mysqld.cnf
-mysql_config_file: /etc/percona-server.conf.d/mysqld.cnf
+mysql_config_dir: /etc/percona-server.conf.d
+mysql_config_file: mysqld.cnf
 mysql_user: root
 mysql_pass: !vault |
           $ANSIBLE_VAULT;1.1;AES256

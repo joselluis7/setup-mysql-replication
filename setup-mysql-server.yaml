@@ -20,22 +20,22 @@
        when: ansible_os_family == "RedHat"
 
      - name: Backup configuration files
-       shell: "cp {{ mysql_config_file }} {{ mysql_config_file }}.bck "
+       shell: "cp {{ mysql_config_dir }}/{{ mysql_config_file }} {{ mysql_config_dir }}/{{ mysql_config_file }}.bck "
 
      - name: Create custom mysqld.cnf file 
        copy:
-        src: template/mysqld.cnf
+        src: 'templates/mysqld.cnf'
         dest: "{{ mysql_config_dir }}/{{ mysql_config_file }}" 
         force: yes
 
      - name: Create the source config file
        template:
-        src: template/source.j2
+        src: 'templates/source.j2'
         dest: "{{ mysql_config_dir }}/source.cnf"
 
      - name: Create the replica config file
        template:
-        src: template/replica.j2
+        src: 'templates/replica.j2'
         dest: "{{ mysql_config_dir }}/replica.cnf"
 
      - name: Create datadir for instance {{ item.name }}
@@ -52,7 +52,7 @@
        
      - name: Initialize datadir for instance {{ item.name }}
        shell: "mysqld --initialize-insecure --basedir=/usr --datadir={{ item.datadir }} --console"
-       #ignore_errors: yes
+       ignore_errors: yes
        with_items:
         - "{{ source }} "
         - "{{ replica }}"
@@ -65,10 +65,23 @@
         - "{{ source.name }}"
         - "{{ replica.name }}"
 
+       
+    #  - name: install pip
+    #    apt:
+    #     name: python3-pip
+    #     state: present
+
+    # # this is the required pip package
+     
+    #  - name: install module
+    #    pip:
+    #     name: PyMySQL
+
+
      - name: Create replica user in source instance and grant replication privillege
        mysql_user:
         login_user: "{{ mysql_user }}"
-        login_password: "{{ mysql_password }}"
+        login_password: ""
         login_port: "{{ source.port }}"
         login_host: 127.0.0.1
         priv: "*.*:REPLICATION SLAVE"
@@ -81,32 +94,42 @@
         mode: getprimary
        register: coordinates
 
+     - name: debug a varible
+       debug: 
+        msg: "{{ coordinates }}"
+
      - name: "change master: point replica to master"
        mysql_replication:
         mode: changeprimary
-        login_user: root
-        login_password: "{{ mysql_pass }}"
+        login_user: "{{ mysql_user }}"
+        login_password: ""
+        login_port: "{{ replica.port }}"
         primary_host: 127.0.0.1
         primary_port: "{{ source.port  }}"
+        primary_user: "{{ mysql_rpl_user }}"
         primary_password: "{{ mysql_rpl_pass }}"
-        primary_log_file: "{{ register.log_file }}"
-        primary_log_pos: "{{ register.log_pos }}"
+        primary_log_file: "{{ coordinates.File }}"
+        primary_log_pos: "{{ coordinates.Position }}"
 
      # Check Before 
-     - name: Check replica replication status.
+     - name: Check replica replication status
        mysql_replication:
         mode: getreplica
-        login_user: "{{ mysql_root_username }}"
-        login_password: "{{ mysql_root_password }}"
+        login_user: "{{ mysql_user }}"
+        login_password: ""
         login_port: "{{ replica.port  }}"
        ignore_errors: true
        register: replica_before
 
+     - name: debug a replica before
+       debug: 
+        msg: "{{ replica_before }}"
+
      - name: Start replication 
        mysql_replication:
         mode: startreplica
-        login_user: "{{ mysql_root_username }}"
-        login_password: "{{ mysql_root_password }}"
+        login_user: "{{ mysql_user }}"
+        login_password: ""
         login_port: "{{ replica.port  }}"
        ignore_errors: true
       
@@ -114,9 +137,12 @@
      - name: Check replica replication status.
        mysql_replication:
         mode: getreplica
-        login_user: "{{ mysql_root_username }}"
-        login_password: "{{ mysql_root_password }}"
+        login_user: "{{ mysql_user}}"
+        login_password: ""
         login_port: "{{ replica.port  }}"
        ignore_errors: true
        register: replica_after
 
+     - name: debug a replica after
+       debug: 
+        msg: "{{ replica_after }}"
