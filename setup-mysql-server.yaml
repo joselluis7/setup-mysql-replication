@@ -1,5 +1,5 @@
 ---
-   - name: Setup a mysql percona server
+   - name: Setup a mysql replication 
      hosts: all
      vars_files:
       - mysql-vars.yaml
@@ -27,44 +27,53 @@
         src: template/mysqld.cnf
         dest: "{{ mysql_config_dir }}/{{ mysql_config_file }}" 
         force: yes
-        
-    
+
+     - name: Create the source config file
+       template:
+        src: template/source.j2
+        dest: "{{ mysql_config_dir }}/source.cnf"
+
+     - name: Create the replica config file
+       template:
+        src: template/replica.j2
+        dest: "{{ mysql_config_dir }}/replica.cnf"
+
      - name: Create datadir for instance {{ item.name }}
        file:
-        path: {{ item.datadir }}
+        path: "{{ item.datadir }}"
         state: directory
         mode: 0751
         owner: mysql
         group: mysql
         recurse: yes
        with_items:
-        - {{ source }}
-        - {{ replica }}
+        - "{{ source }} "
+        - "{{ replica }}"
        
      - name: Initialize datadir for instance {{ item.name }}
        shell: "mysqld --initialize-insecure --basedir=/usr --datadir={{ item.datadir }} --console"
        #ignore_errors: yes
        with_items:
-        - {{ source }}
-        - {{ replica }}
+        - "{{ source }} "
+        - "{{ replica }}"
 
      - name: start service for instance {{ item }}
        service:
         name: mysqld@{{ item }}
         state: started
        with_items:
-        - {{ source.name }}
-        - {{ replica.name }}
+        - "{{ source.name }}"
+        - "{{ replica.name }}"
 
      - name: Create replica user in source instance and grant replication privillege
        mysql_user:
-        login_user: {{ mysql_user }}
+        login_user: "{{ mysql_user }}"
         login_password: "{{ mysql_password }}"
-        login_port: {{ source.port }}
+        login_port: "{{ source.port }}"
         login_host: 127.0.0.1
         priv: "*.*:REPLICATION SLAVE"
-        name: {{  mysql_rpl_user }}
-        password: {{ mysql_rpl_pass }}
+        name: "{{  mysql_rpl_user }}"
+        password: "{{ mysql_rpl_pass }}"
         state: present
 
      - name: Get sources binary log file name and current position
@@ -76,9 +85,9 @@
        mysql_replication:
         mode: changeprimary
         login_user: root
-        login_password: "{{ mysql_password }}"
+        login_password: "{{ mysql_pass }}"
         primary_host: 127.0.0.1
-        primary_port: {{ source.port  }}
+        primary_port: "{{ source.port  }}"
         primary_password: "{{ mysql_rpl_pass }}"
         primary_log_file: "{{ register.log_file }}"
         primary_log_pos: "{{ register.log_pos }}"
@@ -89,7 +98,7 @@
         mode: getreplica
         login_user: "{{ mysql_root_username }}"
         login_password: "{{ mysql_root_password }}"
-        login_port: {{ replica.port  }}
+        login_port: "{{ replica.port  }}"
        ignore_errors: true
        register: replica_before
 
@@ -98,7 +107,7 @@
         mode: startreplica
         login_user: "{{ mysql_root_username }}"
         login_password: "{{ mysql_root_password }}"
-        login_port: {{ replica.port  }}
+        login_port: "{{ replica.port  }}"
        ignore_errors: true
       
      # Check After 
@@ -107,10 +116,7 @@
         mode: getreplica
         login_user: "{{ mysql_root_username }}"
         login_password: "{{ mysql_root_password }}"
-        login_port: {{ replica.port  }}
+        login_port: "{{ replica.port  }}"
        ignore_errors: true
        register: replica_after
 
-# FALTA ADICIONAR AS CONDIÇÕES
-# TALVEZ INTERPOLAR MAIS VARIÁVEIS
-#

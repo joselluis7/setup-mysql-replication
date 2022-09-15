@@ -2,22 +2,3 @@
 user=mysql
 symbolic-links=0
 bind-address=0.0.0.0
-[mysqld_safe]
-log-error=/var/log/mysqld-source-error.log
-
-[mysqld@source]
-server_id   ={{ source.server_id }}
-log-bin     ={{ source.binlog }} 
-datadir     ={{ source.datadir }} 
-socket      ={{ source.socket }} 
-pid-file    ={{ source.pid_file }}
-port        ={{ source.port }}
-log-error   ={{ source.log_gile }}
-
-[mysqld@replica]
-server_id   ={{ replica.server_id  }}
-datadir     ={{ replica.datadir }}
-socket      ={{ replica.socket }}
-pid-file    ={{ replica.pid_file }}
-port        ={{ replica.port }}
-log-error   ={{ replica.log_file }}
