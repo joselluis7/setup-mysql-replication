@@ -1,0 +1,8 @@
+[mysqld@source]
+server_id   ={{ source.server_id }}
+log-bin     ={{ source.binlog }} 
+datadir     ={{ source.datadir }} 
+socket      ={{ source.socket }} 
+pid-file    ={{ source.pid_file }}
+port        ={{ source.port }}
+log-error   ={{ source.log_gile }}
