@@ -20,7 +20,14 @@
        when: ansible_os_family == "RedHat"
 
      - name: Backup configuration files
-       shell: "cp {{ mysql_config_file }} {{ mysql_config_file }}.bck " 
+       shell: "cp {{ mysql_config_file }} {{ mysql_config_file }}.bck "
+
+     - name: Create custom mysqld.cnf file 
+       copy:
+        src: template/mysqld.cnf
+        dest: "{{ mysql_config_dir }}/{{ mysql_config_file }}" 
+        force: yes
+        
     
      - name: Create datadir for instance {{ item.name }}
        file:

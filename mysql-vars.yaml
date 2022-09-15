@@ -1,3 +1,5 @@
+
+mysql_config_dir: /etc/percona-server.conf.d/mysqld.cnf
 mysql_config_file: /etc/percona-server.conf.d/mysqld.cnf
 mysql_user: root
 mysql_pass: !vault |
@@ -15,7 +17,6 @@ mysql_rpl_pass: !vault |
           62306663616232636431393266333663306465343338623031393861356134353962633933663937
           6539613963376432660a616238363239623134393331323638636565356431396135303432636533
           3037
-
 source:
   name: source
   server_id: 1
