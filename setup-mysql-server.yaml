@@ -57,6 +57,20 @@
         - "{{ source }} "
         - "{{ replica }}"
 
+    # Create root password
+     - name: Change root password for all instances
+       mysql_user:
+        login_user: "{{ mysql_user }}"
+        login_password: ""
+        login_port: "{{ item.port }}"
+        login_host: "{{ mysql_host }}"
+        name: "{{  mysql_user }}"
+        password: "{{ mysql_password }}"
+        state: present
+       with_items:
+        - "{{ source }}"
+        - "{{ replica }}"  
+
      - name: start service for instance {{ item }}
        service:
         name: mysqld@{{ item }}
@@ -65,25 +79,12 @@
         - "{{ source.name }}"
         - "{{ replica.name }}"
 
-       
-    #  - name: install pip
-    #    apt:
-    #     name: python3-pip
-    #     state: present
-
-    # # this is the required pip package
-     
-    #  - name: install module
-    #    pip:
-    #     name: PyMySQL
-
-
      - name: Create replica user in source instance and grant replication privillege
        mysql_user:
         login_user: "{{ mysql_user }}"
-        login_password: ""
+        login_password: "{{ mysql_password }}"
         login_port: "{{ source.port }}"
-        login_host: 127.0.0.1
+        login_host: "{{ mysql_host }}"
         priv: "*.*:REPLICATION SLAVE"
         name: "{{  mysql_rpl_user }}"
         password: "{{ mysql_rpl_pass }}"
@@ -101,10 +102,10 @@
      - name: "change master: point replica to master"
        mysql_replication:
         mode: changeprimary
-        login_user: "{{ mysql_user }}"
-        login_password: ""
+        login_user: "{{ mysql_user }}"  
+        login_password: "{{ mysql_password }}"
         login_port: "{{ replica.port }}"
-        primary_host: 127.0.0.1
+        primary_host: "{{ mysql_host }}"
         primary_port: "{{ source.port  }}"
         primary_user: "{{ mysql_rpl_user }}"
         primary_password: "{{ mysql_rpl_pass }}"
@@ -116,7 +117,7 @@
        mysql_replication:
         mode: getreplica
         login_user: "{{ mysql_user }}"
-        login_password: ""
+        login_password: "{{ mysql_password }}"
         login_port: "{{ replica.port  }}"
        ignore_errors: true
        register: replica_before
@@ -129,7 +130,7 @@
        mysql_replication:
         mode: startreplica
         login_user: "{{ mysql_user }}"
-        login_password: ""
+        login_password: "{{ mysql_password }}"
         login_port: "{{ replica.port  }}"
        ignore_errors: true
       
@@ -138,7 +139,7 @@
        mysql_replication:
         mode: getreplica
         login_user: "{{ mysql_user}}"
-        login_password: ""
+        login_password: "{{ mysql_password }}"
         login_port: "{{ replica.port  }}"
        ignore_errors: true
        register: replica_after
