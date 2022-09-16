@@ -1,0 +1,15 @@
+
+---
+  - name: Install percona repository for mysql
+    shell: "yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm"
+    when: ansible_os_family == "RedHat"
+
+  - name: Disable mysql module for RHEL 8
+    shell: "dnf module -y disable mysql"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Install mysql percona server
+    yum: 
+      name: Percona-Server-server-57
+      state: present
+    when: ansible_os_family == "RedHat"

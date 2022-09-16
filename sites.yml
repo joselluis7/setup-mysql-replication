@@ -1,0 +1,17 @@
+- hosts: all
+  name: setup mysql replication
+  vars: 
+    dir: 'group_vars'
+  roles:
+ #   - basicinstall
+    - mysqlinstall
+    - mysqlinstances
+    - replication
+
+# - hosts: host-group
+#   roles:
+#   - role: other
+
+# - hosts: host-group
+#   roles:
+#   - role: another

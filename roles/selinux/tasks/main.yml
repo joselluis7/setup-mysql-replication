@@ -1,0 +1,13 @@
+# FIX SELINUX ISSUE BY ADDING 3307 PORT TO PERMITED PORTS LIST
+---
+  - name: Install Selinux policy python utilities
+    yum: 
+      name: policycoreutils-python-utils
+      state: present
+
+#ADD CONDITIONALS TO CHECK IF PORT IS ALREADY SET
+  - name: Add 3307 port to selinux permited port
+    shell: "semanage port -a -t mysqld_port_t -p tcp 3307"
+    ignore_errors: True
+
+  

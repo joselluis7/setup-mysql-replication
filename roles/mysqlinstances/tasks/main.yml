@@ -1,0 +1,71 @@
+---
+  - name: Backup configuration files
+    shell: "cp {{ mysql_config_dir }}/{{ mysql_config_file }} {{ mysql_config_dir }}/{{ mysql_config_file }}.bck "
+
+  - name: Create custom mysqld.cnf file 
+    copy:
+      src: 'templates/mysqld.cnf'
+      dest: "{{ mysql_config_dir }}/{{ mysql_config_file }}" 
+      force: yes
+
+  - name: Create the source config file
+    template:
+      src: 'templates/source.j2'
+      dest: "{{ mysql_config_dir }}/source.cnf"
+
+  - name: Create the replica config file
+    template:
+      src: 'templates/replica.j2'
+      dest: "{{ mysql_config_dir }}/replica.cnf"
+
+  - name: Create datadir for instance {{ item.name }}
+    file:
+      path: "{{ item.datadir }}"
+      state: directory
+      mode: 0751
+      owner: mysql
+      group: mysql
+      recurse: yes
+    with_items:
+    - "{{ source }}"
+    - "{{ replica }}"
+
+#ADD CONDITIONALS TO CHECK IF IS ALREADY INITIALIZESD
+  - name: Initialize datadir for instance {{ item.name }}
+    shell: "mysqld --initialize-insecure --basedir=/usr --datadir={{ item.datadir }} --console"
+    ignore_errors: True
+    with_items:
+      - "{{ source }} "
+      - "{{ replica }}" 
+
+  - name: selinux role
+    include_role:
+     name: selinux
+
+  - name: start service for instance {{ item }}
+    service:
+      name: mysqld@{{ item }}
+      state: started
+    with_items:
+      - "{{ source.name }}"
+      - "{{ replica.name }}"
+
+  - name: mysqldriver role
+    include_role: 
+      name: mysqldriver
+
+# Create root password
+  - name: Change root password for all instances
+    mysql_user:
+      login_user: "{{ mysql_user }}"
+      login_password: ""
+      login_port: "{{ item.port }}"
+      login_host: "{{ mysql_host }}"
+      name: "{{  mysql_user }}"
+      password: "{{ mysql_password }}"
+      state: present
+    # Add Conditionals to check if exists  (try to enter with empty then)
+    ignore_errors: True
+    with_items:
+      - "{{ source }}"
+      - "{{ replica }}" 

@@ -1,0 +1,72 @@
+---
+  - name: Create replica user in source instance and grant replication privillege
+    mysql_user:
+      login_user: "{{ mysql_user }}"
+      login_password: "{{ mysql_password }}"
+      login_port: "{{ source.port }}"
+      login_host: "{{ mysql_host }}"
+      priv: "*.*:REPLICATION SLAVE"
+      name: "{{  mysql_rpl_user }}"
+      password: "{{ mysql_rpl_pass }}"
+      state: present
+
+  - name: Get sources binary log file name and current position
+    mysql_replication:
+      mode: getprimary
+      login_user: "{{ mysql_user }}"  
+      login_password: "{{ mysql_password }}"
+      login_port: "{{ source.port }}"
+    register: coordinates
+
+  - name: debug a varible
+    debug: 
+      msg: "{{ coordinates }}"
+
+  - name: "change master: point replica to master"
+    mysql_replication:
+      mode: changeprimary
+      login_user: "{{ mysql_user }}"  
+      login_password: "{{ mysql_password }}"
+      login_port: "{{ replica.port }}"
+      primary_host: "{{ mysql_host }}"
+      primary_port: "{{ source.port  }}"
+      primary_user: "{{ mysql_rpl_user }}"
+      primary_password: "{{ mysql_rpl_pass }}"
+      primary_log_file: "{{ coordinates.File }}"
+      primary_log_pos: "{{ coordinates.Position }}"
+
+  # Check Before 
+  - name: Check replica replication status before start
+    mysql_replication:
+      mode: getreplica
+      login_user: "{{ mysql_user }}"
+      login_password: "{{ mysql_password }}"
+      login_port: "{{ replica.port  }}"
+    ignore_errors: true
+    register: replica_before
+
+  - name: debug a replica before
+    debug: 
+      msg: "{{ replica_before }}"
+
+  - name: Start replication 
+    mysql_replication:
+      mode: startreplica
+      login_user: "{{ mysql_user }}"
+      login_password: "{{ mysql_password }}"
+      login_port: "{{ replica.port  }}"
+    ignore_errors: true
+  
+  # Check After 
+  - name: Check replica replication status after start.
+    mysql_replication:
+      mode: getreplica
+      login_user: "{{ mysql_user}}"
+      login_password: "{{ mysql_password }}"
+      login_port: "{{ replica.port  }}"
+    ignore_errors: true
+    register: replica_after
+
+  - name: debug a replica after
+    debug: 
+      msg: "{{ replica_after }}"
