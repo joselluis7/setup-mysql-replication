@@ -1,5 +1,5 @@
 # MySQL Replication 
-This repository contains set of ansibles plabooks to setup a mysql replication.
+This repository contains set of ansible playbooks to setup a mysql master-slave replication.
 
 ## TODO
 
