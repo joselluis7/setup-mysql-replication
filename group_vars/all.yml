@@ -26,6 +26,7 @@ source:
   pid_file: /var/run/mysqld/mysqld-source.pid
   port: 3306
   log_file: /var/log/mysqld-source-error.log
+  config_file: source.cnf
 
 replica:
   name: replica
@@ -35,7 +36,4 @@ replica:
   pid_file: /var/run/mysqld/mysqld-replica.pid
   port: 3307
   log_file: /var/log/mysqld-replica-error.log
-
-# mysql_package_name: "Percona-Server-server"
-# mysql_package_version: "57"
-# mysql_package_repository: "https://repo.percona.com/yum/percona-release-latest.noarch.rpm"
+  config_file: replica.cnf

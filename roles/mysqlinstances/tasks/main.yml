@@ -11,12 +11,12 @@
   - name: Create the source config file
     template:
       src: 'templates/source.j2'
-      dest: "{{ mysql_config_dir }}/source.cnf"
+      dest: "{{ mysql_config_dir }}/{{ source.config_file }}"
 
   - name: Create the replica config file
     template:
       src: 'templates/replica.j2'
-      dest: "{{ mysql_config_dir }}/replica.cnf"
+      dest: "{{ mysql_config_dir }}/{{ replica.config_file }}"
 
   - name: Create datadir for instance {{ item.name }}
     file:
@@ -33,7 +33,7 @@
 #ADD CONDITIONALS TO CHECK IF IS ALREADY INITIALIZESD
   - name: Initialize datadir for instance {{ item.name }}
     shell: "mysqld --initialize-insecure --basedir=/usr --datadir={{ item.datadir }} --console"
-    ignore_errors: True
+    ignore_errors: true
     with_items:
       - "{{ source }} "
       - "{{ replica }}" 
@@ -65,7 +65,7 @@
       password: "{{ mysql_password }}"
       state: present
     # Add Conditionals to check if exists  (try to enter with empty then)
-    ignore_errors: True
+    ignore_errors: true
     with_items:
       - "{{ source }}"
       - "{{ replica }}" 
