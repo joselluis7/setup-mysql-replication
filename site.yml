@@ -1,10 +1,10 @@
 - hosts: all
   name: setup mysql replication
   roles:
-    - basicinstall
-    - mysqlinstall
-    - mysqlinstances
-    - replication
+    - role: basicinstall
+    - role: mysqlinstall
+    - role: mysqlinstances
+    - role: replication
 
 # - hosts: host-group
 #   roles:
